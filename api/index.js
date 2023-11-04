@@ -17,6 +17,8 @@ app.use(cors({credentials: true,origin:'http://localhost:3000'}));
 app.use(express.json());
 app.use(cookieParser());
 
+app.use('/uploads', express.static(__dirname + '/uploads'))
+
 mongoose.connect('mongodb+srv://blog:rKHFKc428D90AWn6@cluster0.qqspmsh.mongodb.net/?retryWrites=true&w=majority');
 
 
@@ -84,19 +86,35 @@ app.post('/post',uploadMiddleWare.single('file'), async (req,res) => {
     const newPath = path + '.' + ext
     fs.renameSync(path, newPath)
 
-    const {title, summary, content} = req.body;
-     const postDoc = await Post.create({
+    const {token} = req.cookies;
+    jwt.verify(token, secret, {}, async (err,info) => {
+        if (err) throw err;
+        const {title, summary, content} = req.body;
+        const postDoc = await Post.create({
         title,
         summary,
         content,
         cover: newPath,
+        author:info.id,
+    })
+        res.json(postDoc)
+        
     })
 
-    res.json(postDoc)
+    
+
+    
 })
 
 app.get('/post', async (req,res) => {
-    res.json(await Post.find())
+    res.json(await Post.find().populate('author', ['username'])
+    .sort({createdAt: -1}).limit(20))
+})
+
+app.get('/post/:id', async (req,res) => {
+    const {id} = req.params
+    const postDoc = await Post.findById(id).populate('author', ['username'])
+    res.json(postDoc)
 })
 
 app.listen(4000);

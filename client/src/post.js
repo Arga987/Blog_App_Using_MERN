@@ -1,16 +1,23 @@
 
 import {format} from "date-fns"
+import { Link } from "react-router-dom";
 
-export default function Post({title,summary,cover,content,createdAt}) {
+export default function Post({_id,title,summary,cover,content,createdAt,author}) {
     return(
         <div className="post">
         <div className="image">
-          <img src="https://img.freepik.com/free-photo/man-neon-suit-sits-chair-with-neon-sign-that-says-word-it_188544-27011.jpg?size=626&ext=jpg&ga=GA1.1.386372595.1697932800&semt=ais" alt="Image for test"></img>
+          <Link to={`/post/${_id}`}>
+            <img src={'http://localhost:4000/' + cover} alt="Image for test"></img>
+          </Link>
+          
         </div>
         <div className="texts">
+        <Link to={`/post/${_id}`}>
           <h2>{title}</h2>
+        </Link>
+          
           <p className="info">
-            <a className="author">Arun S Adiga</a>
+            <a className="author">{author.username}</a>
             <time>{format(new Date(createdAt), 'MMM d, yyyy HH:mm')}</time>
           </p>
           <p className="summary">{summary}</p>
